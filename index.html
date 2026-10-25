@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>洋流地球儀</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EAF1F7; --surface:#FFFFFF; --surface-2:#DCE7F1; --ink:#15233A; --muted:#55667D; --line:#C3D2E0;
+  --ocean:#A9CDE8; --ocean-deep:#8DB8DA; --land:#E3D6AE; --border:#BFAE80;
+  --night:#14224A; --sun:#F2A900; --sun-soft:#FFE3A0; --zone:#16A57A; --zone-soft:rgba(22,165,122,.22);
+  --dot:#E2553D; --good:#16A57A; --bad:#D6453A;
+  --num:"Fredoka","Noto Sans TC",system-ui,sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1A2C; --surface:#162539; --surface-2:#1E3049; --ink:#EAF0F7; --muted:#9DB0C7; --line:#2A3E5A;
+    --ocean:#1C3A5D; --ocean-deep:#16304E; --land:#5D7A68; --border:#3E5A4B;
+    --night:#030814; --sun:#FFC93C; --sun-soft:#5C4A1A; --zone:#3DD6A3; --zone-soft:rgba(61,214,163,.22);
+    --dot:#FF7A5C; --good:#3DD6A3; --bad:#FF6B5E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1A2C; --surface:#162539; --surface-2:#1E3049; --ink:#EAF0F7; --muted:#9DB0C7; --line:#2A3E5A;
+  --ocean:#1C3A5D; --ocean-deep:#16304E; --land:#5D7A68; --border:#3E5A4B;
+  --night:#030814; --sun:#FFC93C; --sun-soft:#5C4A1A; --zone:#3DD6A3; --zone-soft:rgba(61,214,163,.22);
+  --dot:#FF7A5C; --good:#3DD6A3; --bad:#FF6B5E;
+  color-scheme: dark;
+}
+:root{--hi:#1D2A44;--on:#06231A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--hi:#FFFFFF}}
+:root[data-skin="night"]{--bg:#0E1A2C;--surface:#162539;--surface-2:#1E3049;--ink:#EAF0F7;--muted:#9DB0C7;--line:#2A3E5A;--ocean:#1C3A5D;--ocean-deep:#16304E;--land:#5D7A68;--border:#3E5A4B;--night:#030814;--sun:#FFC93C;--sun-soft:#5C4A1A;--zone:#3DD6A3;--zone-soft:rgba(61,214,163,.22);--dot:#FF7A5C;--good:#3DD6A3;--bad:#FF6B5E;--hi:#FFFFFF;--on:#06231A;color-scheme:dark}
+:root[data-skin="sky"]{--bg:#EAF1F7;--surface:#FFFFFF;--surface-2:#DCE7F1;--ink:#15233A;--muted:#55667D;--line:#C3D2E0;--ocean:#A9CDE8;--ocean-deep:#8DB8DA;--land:#E3D6AE;--border:#BFAE80;--night:#14224A;--sun:#F2A900;--sun-soft:#FFE3A0;--zone:#16A57A;--zone-soft:rgba(22,165,122,.22);--dot:#E2553D;--good:#16A57A;--bad:#D6453A;--hi:#1D2A44;--on:#06231A;color-scheme:light}
+:root[data-skin="chalk"]{--bg:#1D3A2F;--surface:#24463A;--surface-2:#2C5445;--ink:#F4F1E4;--muted:#B9C9B8;--line:#3F6655;--ocean:#2A5242;--ocean-deep:#234838;--land:#CFC6A0;--border:#9E9775;--night:#06140E;--sun:#F7D66E;--sun-soft:#5E5326;--zone:#8FD8F5;--zone-soft:rgba(143,216,245,.22);--dot:#F59C8B;--good:#9BE39A;--bad:#F59C8B;--hi:#FFFFFF;--on:#0E2A22;color-scheme:dark}
+:root[data-skin="paper"]{--bg:#EFE5CF;--surface:#F8F0DD;--surface-2:#E8DBBE;--ink:#3A2E21;--muted:#7A6A52;--line:#D2C29E;--ocean:#BCD3CC;--ocean-deep:#A9C5BC;--land:#EAD9AC;--border:#A58F62;--night:#2E2A4C;--sun:#D9822B;--sun-soft:#F3D3A6;--zone:#2F8F83;--zone-soft:rgba(47,143,131,.22);--dot:#B8452F;--good:#2F8F83;--bad:#B8452F;--hi:#3A2E21;--on:#FFFFFF;color-scheme:light}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Sans TC",system-ui,sans-serif;font-size:16px;line-height:1.6;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:1100px;margin:0 auto;padding:20px 16px 48px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+h1{font-size:clamp(28px,6vw,40px);font-weight:900;letter-spacing:.04em;margin:0;line-height:1.1}
+.sub{color:var(--muted);margin:6px 0 0;font-size:14px}
+.clock{font-family:var(--num);font-weight:600;font-size:clamp(34px,8vw,48px);line-height:1;font-variant-numeric:tabular-nums}
+.clock small{display:block;font-family:"Noto Sans TC",sans-serif;font-weight:500;font-size:13px;color:var(--muted);margin-top:4px;text-align:right}
+.main{display:grid;gap:16px}
+@media(min-width:860px){.main{grid-template-columns:1.25fr 1fr;align-items:start}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:14px}
+.globe-panel{padding:8px;position:relative;overflow:hidden;background:radial-gradient(circle at 50% 45%,var(--surface-2),var(--surface) 70%)}
+#globe{display:block;width:100%;height:auto;touch-action:none;cursor:grab}
+#globe:active{cursor:grabbing}
+.hint{position:absolute;left:14px;bottom:10px;font-size:12px;color:var(--muted)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+button,.chip{font:inherit;border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:999px;padding:8px 14px;font-size:14px;font-weight:500;cursor:pointer;min-height:40px}
+button:hover{border-color:var(--muted)}
+button:focus-visible,input:focus-visible{outline:3px solid var(--zone);outline-offset:2px}
+button.on{background:var(--zone);border-color:var(--zone);color:var(--on)}
+button.primary{background:var(--sun);border-color:var(--sun);color:#2A1C00;font-weight:700}
+label.lbl{font-size:13px;color:var(--muted);display:block;margin:12px 0 4px}
+input[type=range]{width:100%;accent-color:var(--sun);height:32px}
+.slider-scale{display:flex;justify-content:space-between;font-family:var(--num);font-size:12px;color:var(--muted);margin-top:-4px}
+.card{margin-top:14px;padding:14px;border-radius:16px;background:var(--surface-2)}
+.card h2{margin:0;font-size:22px;font-weight:900}
+.card .t{font-family:var(--num);font-size:40px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.card .meta{color:var(--muted);font-size:14px}
+.card p{margin:6px 0 0}
+.badge{display:inline-block;font-size:13px;padding:2px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--line);margin-right:6px}
+.cities{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.cities button{min-height:34px;padding:4px 12px;font-size:13px}
+.cities button.sel{background:var(--zone);border-color:var(--zone);color:var(--on)}
+section{margin-top:20px}
+section>h2{font-size:22px;font-weight:900;margin:0 0 4px}
+section>p.sub{margin:0 0 10px}
+.flat-wrap{overflow-x:auto}
+#flat{display:block;width:100%;min-width:640px;height:auto;cursor:pointer;border-radius:12px}
+.learn{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+details{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px}
+summary{font-weight:700;cursor:pointer;font-size:16px}
+details p{margin:8px 0 0;font-size:15px}
+.big-eq{font-family:var(--num);font-size:22px;font-weight:600;margin-top:6px}
+.quiz .q{font-size:19px;font-weight:700;margin:10px 0}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts button{border-radius:14px;min-height:56px;font-family:var(--num);font-size:18px;font-weight:600}
+.opts button.right{background:var(--good);border-color:var(--good);color:var(--on)}
+.opts button.wrong{background:var(--bad);border-color:var(--bad);color:#fff}
+.explain{margin-top:12px;padding:12px;border-radius:12px;background:var(--surface-2);font-size:15px;display:none}
+.explain.show{display:block}
+.score{font-family:var(--num);font-weight:600;color:var(--muted)}
+.globe-label{font-size:18px;font-weight:700;paint-order:stroke;stroke:var(--surface);stroke-width:3px;stroke-linejoin:round}
+.zone-label{font-family:var(--num);font-size:16px;font-weight:600}
+@keyframes flow{to{stroke-dashoffset:-20}}
+@keyframes ray{to{stroke-dashoffset:-36}}
+@keyframes pulse{0%,100%{stroke-opacity:.95}50%{stroke-opacity:.35}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.flow{animation:flow 1.1s linear infinite}
+.ray{animation:ray .9s linear infinite}
+.pulse{animation:pulse 2.4s ease-in-out infinite}
+.spin{animation:spin 18s linear infinite;transform-box:fill-box;transform-origin:center}
+.skins{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin:0 0 14px}
+.skins span{font-size:13px;color:var(--muted);margin-right:2px}
+.skins button{min-height:34px;padding:4px 12px;font-size:13px}
+:root{--warm:#D23F28;--cold:#1C5DC4}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--warm:#FF8A6B;--cold:#7FD3FF}}
+:root[data-skin="night"],:root[data-skin="chalk"]{--warm:#FF8A6B;--cold:#7FD3FF}
+:root[data-skin="sky"],:root[data-skin="paper"]{--warm:#D23F28;--cold:#1C5DC4}
+.legend{font-size:13px;color:var(--muted);display:inline-flex;gap:12px;align-items:center;flex-wrap:wrap}
+.legend[hidden]{display:none}
+.legend i{display:inline-block;width:22px;height:0;border-top:3px dashed;vertical-align:middle;margin-right:4px}
+.cur-label{font-size:17px;font-weight:700;paint-order:stroke;stroke:var(--surface);stroke-width:3.5px;stroke-linejoin:round}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+:root[lang="ja"] body,:root[lang="ja"] .clock small{font-family:"Noto Sans JP","Noto Sans TC",system-ui,sans-serif}
+.lang{margin-left:auto;display:flex;gap:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 data-i18n="h1">洋流地球儀</h1>
+      <p class="sub" data-i18n="sub">拖曳地球轉動，點洋流看介紹。紅色是暖流、藍色是寒流，小水珠流動的方向就是海水流動的方向。</p>
+    </div>
+    <div class="clock"><span id="cnt">22</span><small data-i18n="cnt">條世界主要洋流</small></div>
+  </header>
+
+  <div class="skins" role="group" aria-label="顯示風格"><span data-i18n="skins">顯示風格</span>
+    <button data-skin="night" data-i18n="night">夜空</button><button data-skin="sky" data-i18n="sky">晴空</button><button data-skin="chalk" data-i18n="chalk">黑板</button><button data-skin="paper" data-i18n="paper">紙地圖</button>
+    <div class="lang" role="group" aria-label="Language"><button data-lang="zh">中文</button><button data-lang="ja">日本語</button><button data-lang="en">EN</button></div>
+  </div>
+
+  <div class="main">
+    <div class="panel globe-panel">
+      <svg id="globe" viewBox="0 0 640 640" role="img" aria-label="可拖曳旋轉的地球，顯示世界主要洋流"></svg>
+      <span class="hint" data-i18n="hint">拖曳轉動地球，點洋流名稱看介紹</span>
+    </div>
+
+    <div class="panel">
+      <div class="row" role="group" aria-label="篩選">
+        <button data-f="all" class="on" data-i18n="fAll">全部</button>
+        <button data-f="warm" data-i18n="fWarm">只看暖流</button>
+        <button data-f="cold" data-i18n="fCold">只看寒流</button>
+        <button id="btnTW" class="primary" data-i18n="tw">轉到台灣</button>
+      </div>
+      <div class="row" style="margin-top:10px"><span class="legend"><span><i style="color:var(--warm)"></i><span data-i18n="lgW">暖流</span></span><span><i style="color:var(--cold)"></i><span data-i18n="lgC">寒流</span></span><span data-i18n="lgD">水珠往前漂＝海水流動方向</span></span></div>
+      <div class="card" id="curCard"></div>
+      <div class="cities" id="curBtns"></div>
+    </div>
+  </div>
+
+  <section>
+    <h2 data-i18n="flatH">世界洋流一次看</h2>
+    <p class="sub" data-i18n="flatSub">把整個地球攤平來看，就能看出每個大洋都繞成大圈圈。點地圖上的洋流看介紹，地球儀也會轉過去。</p>
+    <div class="panel flat-wrap"><svg id="flat" viewBox="0 0 1000 540" role="img" aria-label="世界地圖上的主要洋流"></svg></div>
+  </section>
+
+  <section id="ocean">
+    <h2 data-i18n="oceanH">洋流小教室</h2>
+    <p class="sub" data-i18n="oceanSub">六個關鍵觀念，搭配上面的地球儀和地圖一起看。</p>
+    <div class="learn" id="learn">
+      <details open>
+        <summary>洋流是什麼？</summary>
+        <p>海水不是靜止的。大量海水朝固定方向、長距離地流動，就像海裡的大河，叫做<b>洋流</b>。像灣流的水量，比全世界所有河流加起來還多很多倍。</p>
+      </details>
+      <details>
+        <summary>洋流為什麼會流？</summary>
+        <p>最主要的推手是<b>盛行風</b>：赤道附近的信風把海水往西吹，中緯度的西風把海水往東吹。</p>
+        <p>再加上地球自轉讓水流偏轉（北半球往右、南半球往左），又被大陸擋住轉彎，洋流就在大洋裡繞成大圈圈，叫做<b>環流</b>。</p>
+        <div class="big-eq">北半球 順時針 ↻　南半球 逆時針 ↺</div>
+      </details>
+      <details>
+        <summary>暖流和寒流怎麼分？</summary>
+        <p>不是看水溫幾度，而是跟周圍的海水比。</p>
+        <p><b style="color:var(--warm)">暖流</b>：從低緯度（靠赤道）流向高緯度，比周圍海水暖。<br><b style="color:var(--cold)">寒流</b>：從高緯度（靠兩極）流向低緯度，比周圍海水冷。</p>
+        <p>小訣竅：中低緯度的大陸東岸多暖流（如黑潮、灣流），大陸西岸多寒流（如加州涼流、祕魯涼流）。</p>
+      </details>
+      <details>
+        <summary>洋流怎麼影響氣候？</summary>
+        <p>暖流經過的海岸比較溫暖潮濕。北大西洋暖流讓英國、挪威的冬天，比同緯度的加拿大溫和很多。</p>
+        <p>寒流經過的海岸空氣冷、不容易下雨，常有沙漠和濃霧，例如祕魯涼流旁的阿他加馬沙漠、本格拉涼流旁的那米比沙漠。</p>
+      </details>
+      <details>
+        <summary>大漁場是怎麼來的？</summary>
+        <p>寒流和暖流交會的地方，海水上下翻攪，把深海的營養鹽帶上來，浮游生物變多，魚也跟著多。</p>
+        <p>有名的例子：日本東北外海（黑潮＋親潮）、加拿大紐芬蘭（灣流＋拉布拉多寒流）。祕魯外海則是深海冷水往上湧，養出世界級的漁場。</p>
+      </details>
+      <details>
+        <summary>黑潮與台灣</summary>
+        <p>黑潮從菲律賓往北流過台灣東部，一年四季都溫暖，帶來鬼頭刀、飛魚等洄游魚類，也讓台灣東部的冬天比較暖。</p>
+        <p>冬天吹東北季風時，中國沿岸流帶著冷海水往南流進台灣海峽，所以冬天台灣西部沿海的水溫比東部低。</p>
+      </details>
+    </div>
+  </section>
+
+
+  <section class="quiz">
+    <h2 data-i18n="quizH">練習題</h2>
+    <div class="panel">
+      <div class="row" style="justify-content:space-between">
+        <div class="row" role="group" aria-label="難度">
+          <button id="lvE" class="on" data-i18n="lvE">國小</button>
+          <button id="lvJ" data-i18n="lvJ">國中</button>
+        </div>
+        <span class="score" id="score">0 / 0</span>
+      </div>
+      <div class="q" id="qText"></div>
+      <div class="opts" id="qOpts"></div>
+      <div class="explain" id="qExplain"></div>
+      <div class="row" style="margin-top:12px">
+        <button id="qNext" class="primary" data-i18n="qNext">下一題</button>
+        <button id="qShow" style="display:none" data-i18n="qShow">在地圖上看洋流</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+
+<script>
+fetch('https://cdn.jsdelivr.net/npm/world-atlas@2.0.2/countries-110m.json').then(r=>r.json()).then(WORLD=>{
+(function(){
+const CURRENTS=[
+  {n:'黑潮',w:1,lab:[134,25],pts:[[121.8,19],[122.6,23],[124,26.5],[128,29.5],[133,32.5],[140,35],[146,36.5]],d:'台灣最重要的洋流！從菲律賓東邊往北流，經過台灣東部海岸再流向日本。海水溫暖、透明度高，看起來深藍近黑，所以叫黑潮。它帶來鬼頭刀、飛魚等洄游魚類，也讓台灣東部冬天比較暖和。'},
+  {n:'中國沿岸流',w:0,lab:[110,17],pts:[[122.5,31],[121.5,28],[120,25.5],[118,23.5],[115,22]],d:'冬天吹東北季風時，沿著中國東南沿海往南流的冷海水，會流進台灣海峽，所以冬天台灣西部沿海的水溫比東部低。夏天季風轉向，它就變弱。'},
+  {n:'親潮',w:0,lab:[160,46],pts:[[163,57],[157,51],[150,46],[145,41.5]],d:'從北方往南流的寒流，又叫千島寒流。它在日本東北外海和黑潮相遇，寒暖流交會，形成世界有名的大漁場。'},
+  {n:'北太平洋暖流',w:1,lab:[-165,36],pts:[[147,37.5],[160,40],[175,41.5],[-165,42.5],[-148,43.5],[-132,45]],d:'黑潮的延續。被中緯度的西風推著往東，橫越整個太平洋，一路流到北美洲西岸。'},
+  {n:'阿拉斯加暖流',w:1,lab:[-158,63],pts:[[-132,47.5],[-137,54],[-146,59],[-158,57.5]],d:'北太平洋暖流往北轉的一支，讓阿拉斯加南邊的海港冬天也不容易結冰。'},
+  {n:'加州涼流',w:0,lab:[-140,28],pts:[[-128,46],[-126,39],[-121,31],[-115,23],[-110,17]],d:'沿北美洲西岸往南流的寒流。舊金山夏天常常起霧、海水冰涼，就是它造成的。'},
+  {n:'北赤道洋流',o:'太平洋',w:1,lab:[-155,18],pts:[[-108,12],[-130,13],[-155,13.5],[180,14],[155,14],[130,15],[124,17]],d:'赤道北邊的東北信風，把溫暖的海水一路往西吹。碰到亞洲後往北轉彎，就變成黑潮。'},
+  {n:'南赤道洋流',o:'太平洋',w:1,lab:[-130,-17],pts:[[-82,-4],[-105,-6],[-135,-8],[-165,-10],[170,-12],[155,-13]],d:'赤道南邊的東南信風，把溫暖的海水往西吹，碰到澳洲後往南轉。'},
+  {n:'東澳暖流',w:1,lab:[168,-30],pts:[[155,-14],[155,-22],[154,-30],[154.5,-36],[158,-40]],d:'沿著澳洲東岸往南流的暖流，讓雪梨附近的海水比較溫暖。'},
+  {n:'祕魯涼流',w:0,lab:[-92,-26],pts:[[-76,-44],[-76,-33],[-74,-22],[-79,-12],[-84,-4]],d:'沿南美洲西岸往北流的寒流。深海冷水帶著營養鹽往上湧，養出大量浮游生物和魚，是世界級大漁場；但它也讓沿岸又冷又乾，形成阿他加馬沙漠。'},
+  {n:'灣流',w:1,lab:[-64,30],pts:[[-82,25],[-80,28.5],[-78,32.5],[-73,37],[-63,40],[-50,42.5]],d:'又叫墨西哥灣流，是全世界最強的暖流之一，從墨西哥灣出發，沿美國東岸往東北流。'},
+  {n:'北大西洋暖流',w:1,lab:[-20,40],pts:[[-46,44.5],[-32,49],[-18,54],[-6,59],[6,65],[18,71]],d:'灣流的延續，被西風送到歐洲。英國、挪威的緯度很高，冬天卻比同緯度的加拿大溫和許多，挪威北部的港口冬天也不結冰。'},
+  {n:'拉布拉多寒流',w:0,lab:[-38,58],pts:[[-61,64],[-58,57],[-54,51],[-50,46]],d:'從北極海附近往南流的寒流，在加拿大紐芬蘭外海和灣流相遇，形成大漁場，也常常起濃霧、漂來冰山（鐵達尼號就是在這附近撞上冰山）。'},
+  {n:'加那利涼流',w:0,lab:[-30,26],pts:[[-15,41],[-14,33],[-17,25],[-20,17]],d:'沿非洲西北岸往南流的寒流，讓旁邊撒哈拉沙漠的海岸更不容易下雨。'},
+  {n:'北赤道洋流',o:'大西洋',w:1,h:1,lab:[-40,12],pts:[[-19,14],[-35,14.5],[-52,15.5],[-68,18]],d:'東北信風把大西洋赤道北邊的溫暖海水往西吹，流進加勒比海，最後匯成灣流。'},
+  {n:'南赤道洋流',o:'大西洋',w:1,h:1,lab:[-12,-10],pts:[[8,-2],[-8,-4],[-22,-6],[-34,-8]],d:'東南信風把大西洋赤道南邊的海水往西吹，碰到南美洲後往南轉，變成巴西暖流。'},
+  {n:'巴西暖流',w:1,lab:[-24,-24],pts:[[-35,-10],[-38,-17],[-42,-24],[-48,-32],[-53,-38]],d:'南赤道洋流碰到南美洲後往南轉，沿著巴西海岸流的暖流。'},
+  {n:'本格拉涼流',w:0,lab:[0,-33],pts:[[17,-36],[13,-28],[11,-20],[9,-11]],d:'沿非洲西南岸往北流的寒流，旁邊就是非常乾燥的那米比沙漠。'},
+  {n:'莫三比克暖流',w:1,lab:[58,-30],pts:[[42,-11],[39,-19],[35,-27],[28,-34.5],[20,-37]],d:'沿非洲東南岸往南流的暖流，南段又叫阿古拉斯洋流。'},
+  {n:'南赤道洋流',o:'印度洋',w:1,lab:[78,-9],pts:[[105,-12],[85,-13],[65,-13],[49,-13]],d:'東南信風把印度洋南邊的海水往西吹，碰到非洲後往南轉。（北印度洋的洋流比較特別，會跟著季風一年換兩次方向。）'},
+  {n:'西澳涼流',w:0,lab:[98,-30],pts:[[116,-37],[112,-29],[111,-21],[108,-15]],d:'沿澳洲西岸往北流的寒流，澳洲西部因此很乾，有大片沙漠。'},
+  {n:'西風漂流',w:0,lab:[100,-46],pts:d3.range(-65,281,10).map(l=>[((l+180)%360+360)%360-180,-50+2.5*Math.sin(l/40)]),d:'在南半球高緯度，強勁的西風把海水一直往東吹。這裡幾乎沒有大陸擋路，所以它繞著南極洲流一整圈，是全世界水量最大的洋流（又叫南極環流）。'}
+];
+CURRENTS.forEach(c=>c.geo={type:'LineString',coordinates:c.pts});
+const land = topojson.feature(WORLD, WORLD.objects.land);
+const borders = topojson.mesh(WORLD, WORLD.objects.countries, (a,b)=>a!==b);
+const state={rot:[-125,-22],sel:-1,f:'all'};
+const show=(d,i)=>state.f==='all'||(state.f==='warm')===!!d.w;
+const TR={ja:[
+['黒潮','台湾にとって一番大切な海流！フィリピンの東から北へ流れ、台湾の東の海岸を通って日本へ向かいます。水が暖かく透明度が高いため黒っぽく見えるので、黒潮と呼ばれます。シイラやトビウオなどの回遊魚を運び、台湾東部の冬を暖かくしています。'],
+['中国沿岸流','冬に北東の季節風が吹くと、中国南東の沿岸に沿って南へ流れる冷たい海水が台湾海峡に入りこみます。そのため冬は台湾西部の海水温が東部より低くなります。夏は季節風の向きが変わるので弱まります。'],
+['親潮','北から南へ流れる寒流で、千島海流ともいいます。日本の東北沖で黒潮と出会い、暖流と寒流がぶつかって世界有数の漁場ができます。'],
+['北太平洋海流','黒潮の続きです。中緯度の偏西風に押されて東へ進み、太平洋を横切って北アメリカの西岸まで流れます。'],
+['アラスカ海流','北太平洋海流から北へ分かれた流れで、アラスカ南部の港を冬でも凍りにくくしています。'],
+['カリフォルニア海流','北アメリカの西岸に沿って南へ流れる寒流です。サンフランシスコの夏に霧が多く、海が冷たいのはこの海流のせいです。'],
+['北赤道海流','赤道の北で吹く北東貿易風が、暖かい海水を西へ西へと運びます。アジアにぶつかると北へ曲がり、黒潮になります。'],
+['南赤道海流','赤道の南で吹く南東貿易風が、暖かい海水を西へ運びます。オーストラリアにぶつかると南へ曲がります。'],
+['東オーストラリア海流','オーストラリアの東岸に沿って南へ流れる暖流で、シドニー周辺の海を暖かくしています。'],
+['ペルー海流','南アメリカの西岸に沿って北へ流れる寒流です。深海の冷たい水が栄養をのせてわき上がり、プランクトンや魚がたくさん育つ世界的な漁場になっています。いっぽうで沿岸は寒くて乾燥し、アタカマ砂漠ができました。'],
+['メキシコ湾流','ガルフストリームとも呼ばれ、世界で最も強い暖流のひとつです。メキシコ湾から出て、アメリカの東岸に沿って北東へ流れます。'],
+['北大西洋海流','メキシコ湾流の続きで、偏西風によってヨーロッパへ運ばれます。イギリスやノルウェーは緯度が高いのに、同じ緯度のカナダより冬がずっと穏やかで、ノルウェー北部の港も冬に凍りません。'],
+['ラブラドル海流','北極海の近くから南へ流れる寒流です。カナダのニューファンドランド沖でメキシコ湾流と出会って大きな漁場をつくり、濃い霧や氷山もよく見られます（タイタニック号が氷山にぶつかったのもこの近くです）。'],
+['カナリア海流','アフリカ北西岸に沿って南へ流れる寒流で、となりのサハラ砂漠の海岸をさらに雨が降りにくくしています。'],
+['北赤道海流','北東貿易風が大西洋の赤道の北にある暖かい海水を西へ運び、カリブ海に流れこんで、やがてメキシコ湾流になります。'],
+['南赤道海流','南東貿易風が大西洋の赤道の南の海水を西へ運び、南アメリカにぶつかると南へ曲がってブラジル海流になります。'],
+['ブラジル海流','南赤道海流が南アメリカにぶつかって南へ曲がり、ブラジルの海岸に沿って流れる暖流です。'],
+['ベンゲラ海流','アフリカ南西岸に沿って北へ流れる寒流で、すぐとなりにはとても乾燥したナミブ砂漠があります。'],
+['モザンビーク海流','アフリカ南東岸に沿って南へ流れる暖流で、南の部分はアガラス海流とも呼ばれます。'],
+['南赤道海流','南東貿易風がインド洋の南の海水を西へ運び、アフリカにぶつかると南へ曲がります。（北インド洋の海流はちょっと特別で、季節風にあわせて1年に2回向きが変わります。）'],
+['西オーストラリア海流','オーストラリアの西岸に沿って北へ流れる寒流で、そのためオーストラリア西部は乾燥していて、広い砂漠があります。'],
+['南極環流','南半球の高緯度では、強い偏西風が海水をずっと東へ押し続けます。ここには行く手をふさぐ大陸がほとんどないので、南極大陸のまわりを一周して流れる、世界で一番水量の多い海流です（西風漂流ともいいます）。']
+],en:[
+['Kuroshio','Taiwan’s most important current! It flows north from east of the Philippines, past Taiwan’s east coast and on to Japan. Its warm, very clear water looks so deep blue it is almost black, which is where the name (“black current”) comes from. It brings migrating fish such as mahi-mahi and flying fish, and keeps eastern Taiwan milder in winter.'],
+['China Coastal Current','When the northeast monsoon blows in winter, cold water flows south along China’s southeast coast and into the Taiwan Strait. That is why the sea off western Taiwan is colder than the east in winter. In summer the monsoon turns around and this current weakens.'],
+['Oyashio','A cold current flowing south from the north, also called the Kuril Current. It meets the Kuroshio off northeastern Japan, and where the warm and cold water mix, one of the world’s great fishing grounds forms.'],
+['North Pacific Current','The continuation of the Kuroshio. Pushed east by the mid-latitude westerlies, it crosses the whole Pacific to the west coast of North America.'],
+['Alaska Current','A branch of the North Pacific Current that turns north, keeping harbors in southern Alaska from freezing easily in winter.'],
+['California Current','A cold current flowing south along the west coast of North America. It is why San Francisco summers are so foggy and the sea is so chilly.'],
+['North Equatorial Current','North of the equator, the northeast trade winds push warm water steadily west. When it reaches Asia it turns north and becomes the Kuroshio.'],
+['South Equatorial Current','South of the equator, the southeast trade winds push warm water west. When it reaches Australia it turns south.'],
+['East Australian Current','A warm current flowing south along Australia’s east coast, keeping the sea around Sydney warm.'],
+['Humboldt Current','A cold current flowing north along South America’s west coast. Cold, nutrient-rich water wells up from the deep, feeding huge amounts of plankton and fish and making a world-class fishing ground. It also makes the coast cold and dry, creating the Atacama Desert.'],
+['Gulf Stream','One of the strongest warm currents on Earth. It leaves the Gulf of Mexico and flows northeast along the US east coast.'],
+['North Atlantic Drift','The continuation of the Gulf Stream, carried to Europe by the westerlies. Britain and Norway are far north, yet their winters are much milder than Canada’s at the same latitude, and harbors in northern Norway stay ice-free.'],
+['Labrador Current','A cold current flowing south from near the Arctic Ocean. Off Newfoundland, Canada, it meets the Gulf Stream, creating a great fishing ground along with thick fog and drifting icebergs (the Titanic hit an iceberg near here).'],
+['Canary Current','A cold current flowing south along northwest Africa, making the Sahara’s coast even less likely to get rain.'],
+['North Equatorial Current','The northeast trade winds push warm water north of the Atlantic equator west into the Caribbean, where it eventually feeds the Gulf Stream.'],
+['South Equatorial Current','The southeast trade winds push water south of the Atlantic equator west. When it hits South America it turns south and becomes the Brazil Current.'],
+['Brazil Current','A warm current formed when the South Equatorial Current hits South America and turns south along the Brazilian coast.'],
+['Benguela Current','A cold current flowing north along southwest Africa, right next to the very dry Namib Desert.'],
+['Mozambique Current','A warm current flowing south along southeast Africa; its southern part is called the Agulhas Current.'],
+['South Equatorial Current','The southeast trade winds push water across the southern Indian Ocean to the west; at Africa it turns south. (Currents in the northern Indian Ocean are special: they reverse direction twice a year with the monsoon.)'],
+['West Australian Current','A cold current flowing north along Australia’s west coast, part of why western Australia is so dry and has large deserts.'],
+['West Wind Drift','At high southern latitudes, strong westerly winds push water east nonstop. With almost no land in the way, it circles all the way around Antarctica, making it the largest current on Earth by volume (also called the Antarctic Circumpolar Current).']
+]};
+const OCEAN={ja:{'太平洋':'太平洋','大西洋':'大西洋','印度洋':'インド洋','北冰洋':'北極海','南冰洋':'南極海'},en:{'太平洋':'Pacific','大西洋':'Atlantic','印度洋':'Indian','北冰洋':'Arctic','南冰洋':'Southern'}};
+const CQ={ja:[
+{q:'西ヨーロッパの冬が同じ緯度のほかの地域より穏やかなのは、おもにどの海流のおかげ？',a:'北大西洋海流',o:['北大西洋海流','カナリア海流','ラブラドル海流','ペルー海流'],e:'メキシコ湾流から続く北大西洋海流が暖かい海水をヨーロッパ西岸へ運び、偏西風がその暖かい空気を陸へ吹きこむので、冬が穏やかになります。'},
+{q:'台湾の東を流れ、一年中暖かい海流はどれ？',a:'黒潮',o:['黒潮','親潮','中国沿岸流','カリフォルニア海流'],e:'黒潮はフィリピンの東から北へ流れ、台湾の東を通って日本へ向かいます。低緯度から高緯度へ流れる暖流です。'},
+{q:'冬に台湾海峡へ流れこみ、台湾西部の沿岸を冷たくするのはどれ？',a:'中国沿岸流',o:['中国沿岸流','黒潮','親潮','北赤道海流'],e:'冬に北東の季節風が吹くと、中国沿岸の冷たい海水が南へ流れて台湾海峡に入るので、冬は台湾西部の沿岸の水温が東部より低くなります。'},
+{q:'日本の東北沖の大漁場は、どの2つの海流が出会ってできた？',a:'黒潮＋親潮',o:['黒潮＋親潮','メキシコ湾流＋ラブラドル海流','ペルー海流＋ブラジル海流','ベンゲラ海流＋モザンビーク海流'],e:'南から来る暖流の黒潮と、北から来る寒流の親潮がここで出会います。海水がかき混ぜられて栄養が上がり、プランクトンが増えるので魚も増えます。'},
+{q:'寒流が流れる海岸では、どんな景色がよく見られる？',a:'砂漠',o:['砂漠','熱帯雨林','氷河','火山'],e:'寒流は海の上の空気を冷やして重くするので、空気が上がって雲や雨になりにくく、沿岸に砂漠ができやすくなります。ペルー海流のそばのアタカマ砂漠、ベンゲラ海流のそばのナミブ砂漠がその例です。'},
+{q:'北半球の大洋をめぐる大きな海流の輪は、だいたいどちら向きに回っている？',a:'時計回り',o:['時計回り','反時計回り','ずっと北へ流れる','回らない'],e:'赤道付近の貿易風は西へ、中緯度の偏西風は東へ吹き、さらに地球の自転で流れが右へそれるので、北半球の環流は時計回りになります。南半球はその逆で反時計回りです。'},
+{q:'南極大陸のまわりを一周する、水量が世界一の海流は？',a:'南極環流',o:['南極環流','北赤道海流','メキシコ湾流','黒潮'],e:'南半球の高緯度には行く手をふさぐ大陸がほとんどなく、偏西風が海水を東へ押し続けるので、南極大陸のまわりを大きく一周します。'}
+],en:[
+{q:'Western Europe has milder winters than other places at the same latitude. Which current is mainly responsible?',a:'North Atlantic Drift',o:['North Atlantic Drift','Canary Current','Labrador Current','Humboldt Current'],e:'The North Atlantic Drift, an extension of the Gulf Stream, carries warm water to Europe’s west coast, and the westerlies blow that warm air onshore, so winters stay mild.'},
+{q:'Which current flows past eastern Taiwan and stays warm all year?',a:'Kuroshio',o:['Kuroshio','Oyashio','China Coastal Current','California Current'],e:'The Kuroshio flows north from east of the Philippines, past eastern Taiwan to Japan. It flows from low to high latitudes, so it is a warm current.'},
+{q:'In winter, which current flows into the Taiwan Strait and chills Taiwan’s west coast?',a:'China Coastal Current',o:['China Coastal Current','Kuroshio','Oyashio','North Equatorial Current'],e:'When the northeast monsoon blows in winter, cold water from China’s coast flows south into the Taiwan Strait, so western Taiwan’s coastal water is colder than the east’s.'},
+{q:'The rich fishing grounds off northeastern Japan form where which two currents meet?',a:'Kuroshio + Oyashio',o:['Kuroshio + Oyashio','Gulf Stream + Labrador','Humboldt + Brazil','Benguela + Mozambique'],e:'The warm Kuroshio from the south meets the cold Oyashio from the north. The mixing lifts nutrients up, plankton thrives, and so do fish.'},
+{q:'What kind of landscape is often found along coasts with cold currents?',a:'Desert',o:['Desert','Rainforest','Glacier','Volcano'],e:'Cold currents chill the air above the sea and make it heavy, so it rarely rises to form clouds and rain. Coastal deserts result, like the Atacama beside the Humboldt Current and the Namib beside the Benguela Current.'},
+{q:'Which way do the big current loops in Northern Hemisphere oceans generally turn?',a:'Clockwise',o:['Clockwise','Counterclockwise','Straight north','They don’t turn'],e:'Trade winds near the equator blow west, westerlies at mid-latitudes blow east, and Earth’s rotation deflects water to the right, so northern gyres turn clockwise. Southern ones turn the other way, counterclockwise.'},
+{q:'Which current circles all the way around Antarctica and carries the most water?',a:'West Wind Drift',o:['West Wind Drift','North Equatorial Current','Gulf Stream','Kuroshio'],e:'At high southern latitudes there is almost no land in the way, so the westerlies keep pushing water east all the way around Antarctica.'}
+]};
+const UI={
+zh:{title:'洋流地球儀',h1:'洋流地球儀',sub:'拖曳地球轉動，點洋流看介紹。紅色是暖流、藍色是寒流，小水珠流動的方向就是海水流動的方向。',cnt:'條世界主要洋流',skins:'顯示風格',night:'夜空',sky:'晴空',chalk:'黑板',paper:'紙地圖',hint:'拖曳轉動地球，點洋流名稱看介紹',fAll:'全部',fWarm:'只看暖流',fCold:'只看寒流',tw:'轉到台灣',lgW:'暖流',lgC:'寒流',lgD:'水珠往前漂＝海水流動方向',flatH:'世界洋流一次看',flatSub:'把整個地球攤平來看，就能看出每個大洋都繞成大圈圈。點地圖上的洋流看介紹，地球儀也會轉過去。',oceanH:'洋流小教室',oceanSub:'六個關鍵觀念，搭配上面的地球儀和地圖一起看。',quizH:'練習題',lvE:'國小',lvJ:'國中',qNext:'下一題',qShow:'在地圖上看洋流',
+ cardH:'點地球儀或地圖上的洋流，看它的故事',cardP:'紅色是<b style="color:var(--warm)">暖流</b>（從靠赤道的溫暖海域流向高緯度），藍色是<b style="color:var(--cold)">寒流</b>（從靠兩極的冷海域流向低緯度）。也可以點下面的名字。',
+ warm:'暖流',cold:'寒流',warmDesc:'從低緯度流向高緯度，比周圍海水暖',coldDesc:'從高緯度流向低緯度，比周圍海水冷',optW:'暖流',optC:'寒流',
+ qType:nm=>`「${nm}」是暖流還是寒流？（可以在地圖上找找看）`,expType:(nm,w)=>`${nm}${w?'從靠赤道的低緯度流向高緯度，比周圍海水溫暖':'從靠兩極的高緯度流向低緯度，比周圍海水冷'}，所以是${w?'暖流':'寒流'}。`,
+ right:'答對了！',wrong:'再想想：',score:'答對',lat:['赤道 0°','北回歸線','南回歸線'],html:'zh-Hant'},
+ja:{title:'海流地球儀',h1:'海流地球儀',sub:'地球をドラッグして回し、海流をタップすると説明が出ます。赤は暖流、青は寒流。小さな水玉の動く向きが、海水の流れる向きです。',cnt:'本の主な海流',skins:'表示スタイル',night:'夜空',sky:'青空',chalk:'黒板',paper:'紙の地図',hint:'ドラッグで地球を回し、海流の名前をタップ',fAll:'すべて',fWarm:'暖流だけ',fCold:'寒流だけ',tw:'台湾へ',lgW:'暖流',lgC:'寒流',lgD:'水玉の動き＝海水の流れる向き',flatH:'世界の海流を一望',flatSub:'地球を平らに広げると、どの大洋でも海流が大きな輪を描いているのがわかります。地図の海流をタップすると、地球儀もそこへ回ります。',oceanH:'海流ミニ教室',oceanSub:'6つの大切な考え方。上の地球儀や地図と一緒に見てみよう。',quizH:'練習問題',lvE:'小学生',lvJ:'中学生',qNext:'次の問題',qShow:'地図で見る',
+ cardH:'地球儀か地図の海流をタップして、そのお話を見てみよう',cardP:'赤は<b style="color:var(--warm)">暖流</b>（赤道に近い暖かい海から高緯度へ流れる）、青は<b style="color:var(--cold)">寒流</b>（両極に近い冷たい海から低緯度へ流れる）。下の名前をタップしても見られます。',
+ warm:'暖流',cold:'寒流',warmDesc:'低緯度から高緯度へ流れ、まわりの海水より暖かい',coldDesc:'高緯度から低緯度へ流れ、まわりの海水より冷たい',optW:'暖流',optC:'寒流',
+ qType:nm=>`「${nm}」は暖流？それとも寒流？（地図で探してみよう）`,expType:(nm,w)=>`${nm}は${w?'赤道に近い低緯度から高緯度へ流れ、まわりの海水より暖かいので暖流です。':'両極に近い高緯度から低緯度へ流れ、まわりの海水より冷たいので寒流です。'}`,
+ right:'正解！',wrong:'もう一度考えよう：',score:'正解',lat:['赤道 0°','北回帰線','南回帰線'],html:'ja'},
+en:{title:'Ocean Currents Globe',h1:'Ocean Currents Globe',sub:'Drag to spin the globe and tap a current to learn about it. Red marks warm currents, blue marks cold ones, and the little drops drift the way the water flows.',cnt:'major ocean currents',skins:'Style',night:'Night',sky:'Sky',chalk:'Chalkboard',paper:'Paper map',hint:'Drag to spin; tap a current’s name',fAll:'All',fWarm:'Warm only',fCold:'Cold only',tw:'Go to Taiwan',lgW:'Warm',lgC:'Cold',lgD:'Drops drift with the flow',flatH:'All the world’s currents at once',flatSub:'Flatten the Earth and you can see every ocean’s currents loop into giant circles. Tap a current on the map and the globe turns to it.',oceanH:'Ocean Currents 101',oceanSub:'Six key ideas to explore with the globe and map above.',quizH:'Practice',lvE:'Elementary',lvJ:'Junior high',qNext:'Next',qShow:'See it on the map',
+ cardH:'Tap a current on the globe or map to read its story',cardP:'Red marks <b style="color:var(--warm)">warm currents</b> (flowing from warm seas near the equator toward high latitudes); blue marks <b style="color:var(--cold)">cold currents</b> (flowing from cold polar seas toward low latitudes). You can also tap a name below.',
+ warm:'Warm current',cold:'Cold current',warmDesc:'Flows from low to high latitudes; warmer than the water around it',coldDesc:'Flows from high to low latitudes; colder than the water around it',optW:'Warm current',optC:'Cold current',
+ qType:nm=>`Is the ${nm} a warm current or a cold current? (Try finding it on the map.)`,expType:(nm,w)=>`The ${nm} ${w?'flows from low latitudes near the equator toward high latitudes and is warmer than the water around it, so it is a warm current.':'flows from high latitudes near the poles toward low latitudes and is colder than the water around it, so it is a cold current.'}`,
+ right:'Correct!',wrong:'Not quite:',score:'Score',lat:['Equator 0°','Tropic of Cancer','Tropic of Capricorn'],html:'en'}
+};
+UI.ja.learn=`<details open><summary>海流ってなに？</summary><p>海の水はじっとしていません。たくさんの海水が決まった向きに長い距離を流れていて、海の中の大きな川のようです。これを<b>海流</b>といいます。メキシコ湾流の水の量は、世界中の川をあわせたよりも何倍も多いのです。</p></details>
+<details><summary>海流はなぜ流れるの？</summary><p>いちばんの原動力は<b>いつも吹いている風</b>です。赤道付近の貿易風は海水を西へ、中緯度の偏西風は海水を東へ押します。</p><p>さらに地球の自転で流れの向きがそれ（北半球では右、南半球では左）、大陸にぶつかって曲がるので、海流は大洋の中で大きな輪を描きます。これを<b>環流</b>といいます。</p><div class="big-eq">北半球 時計回り ↻　南半球 反時計回り ↺</div></details>
+<details><summary>暖流と寒流のちがいは？</summary><p>水温が何度かではなく、まわりの海水とくらべて決めます。</p><p><b style="color:var(--warm)">暖流</b>：低緯度（赤道寄り）から高緯度へ流れ、まわりの海水より暖かい。<br><b style="color:var(--cold)">寒流</b>：高緯度（両極寄り）から低緯度へ流れ、まわりの海水より冷たい。</p><p>コツ：中・低緯度では、大陸の東岸に暖流（黒潮、メキシコ湾流など）、西岸に寒流（カリフォルニア海流、ペルー海流など）が多く流れています。</p></details>
+<details><summary>海流は気候にどう影響するの？</summary><p>暖流が流れる海岸は暖かく湿っています。北大西洋海流のおかげで、イギリスやノルウェーの冬は同じ緯度のカナダよりずっと穏やかです。</p><p>寒流が流れる海岸は空気が冷たく雨が降りにくいので、砂漠や濃い霧が多くなります。ペルー海流のそばのアタカマ砂漠、ベンゲラ海流のそばのナミブ砂漠がその例です。</p></details>
+<details><summary>大きな漁場はどうしてできるの？</summary><p>寒流と暖流が出会うところでは、海水が上下にかき混ぜられて深い海の栄養が上がってきます。プランクトンが増え、それを食べる魚も増えます。</p><p>有名な例：日本の東北沖（黒潮＋親潮）、カナダのニューファンドランド沖（メキシコ湾流＋ラブラドル海流）。ペルー沖では深海の冷たい水がわき上がり、世界有数の漁場になっています。</p></details>
+<details><summary>黒潮と台湾</summary><p>黒潮はフィリピンから北へ、台湾の東を流れます。一年中暖かく、シイラやトビウオなどの回遊魚を運び、台湾東部の冬を暖かくしています。</p><p>冬に北東の季節風が吹くと、中国沿岸流が冷たい海水を南へ運んで台湾海峡に流れこむので、冬は台湾西部の沿岸の水温が東部より低くなります。</p></details>`;
+UI.en.learn=`<details open><summary>What is an ocean current?</summary><p>Seawater never stands still. Huge amounts of it travel long distances in a steady direction, like giant rivers inside the ocean. These are called <b>ocean currents</b>. The Gulf Stream alone carries many times more water than all the world’s rivers combined.</p></details>
+<details><summary>Why do currents flow?</summary><p>The main driver is the <b>prevailing winds</b>: trade winds near the equator push water west, and westerlies at mid-latitudes push it east.</p><p>Earth’s rotation also bends moving water (to the right in the Northern Hemisphere, to the left in the Southern), and continents block and turn it. So currents loop around each ocean in giant circles called <b>gyres</b>.</p><div class="big-eq">North: clockwise ↻　South: counterclockwise ↺</div></details>
+<details><summary>Warm or cold: how can you tell?</summary><p>It isn’t about the exact temperature. It’s about how the water compares with the sea around it.</p><p><b style="color:var(--warm)">Warm current</b>: flows from low latitudes (near the equator) toward high latitudes, and is warmer than the surrounding water.<br><b style="color:var(--cold)">Cold current</b>: flows from high latitudes (near the poles) toward low latitudes, and is colder than the surrounding water.</p><p>Tip: at low and middle latitudes, warm currents tend to run along the east coasts of continents (Kuroshio, Gulf Stream) and cold currents along the west coasts (California, Humboldt).</p></details>
+<details><summary>How do currents affect climate?</summary><p>Coasts with warm currents tend to be warm and wet. Thanks to the North Atlantic Drift, Britain and Norway have much milder winters than Canada at the same latitude.</p><p>Coasts with cold currents have cool air that rarely makes rain, so deserts and thick fog are common, like the Atacama Desert by the Humboldt Current and the Namib Desert by the Benguela Current.</p></details>
+<details><summary>Where do great fishing grounds come from?</summary><p>Where cold and warm currents meet, the water churns up and down and lifts nutrients from the deep. Plankton multiply, and so do the fish that eat them.</p><p>Famous examples: off northeastern Japan (Kuroshio + Oyashio) and off Newfoundland, Canada (Gulf Stream + Labrador Current). Off Peru, cold deep water wells up and creates one of the world’s richest fisheries.</p></details>
+<details><summary>The Kuroshio and Taiwan</summary><p>The Kuroshio flows north from the Philippines along Taiwan’s east coast. It stays warm all year, brings migrating fish such as mahi-mahi and flying fish, and keeps eastern Taiwan milder in winter.</p><p>When the northeast monsoon blows in winter, the China Coastal Current carries cold water south into the Taiwan Strait, so the sea off western Taiwan is colder than off the east.</p></details>`;
+let lang='zh';
+const t=k=>UI[lang][k];
+const L=c=>lang==='zh'?c.n:TR[lang][CURRENTS.indexOf(c)][0];
+const D=c=>lang==='zh'?c.d:TR[lang][CURRENTS.indexOf(c)][1];
+const OCN=n=>lang==='zh'?n:OCEAN[lang][n];
+const curName=c=>{const n=L(c);if(!c.o)return n;const o=OCN(c.o);return lang==='en'?`${n} (${o})`:`${n}（${o}）`;};
+
+const col=d=>d.w?'var(--warm)':'var(--cold)';
+function parallel(lat){const c=[];for(let lo=-180;lo<=180;lo+=5)c.push([lo,lat]);return {type:'LineString',coordinates:c};}
+const OC=[{n:'太平洋',p:[-145,8],b:1},{n:'太平洋',p:[168,14],b:1},{n:'大西洋',p:[-40,28],b:1},{n:'大西洋',p:[-12,-38],b:1},{n:'印度洋',p:[78,-22],b:1},{n:'北冰洋',p:[-20,82]},{n:'南冰洋',p:[40,-62]}];
+
+// ---------- globe ----------
+const G=640,R=200;
+const gsvg=d3.select('#globe');
+const proj=d3.geoOrthographic().scale(R).translate([G/2,G/2]).clipAngle(90).precision(.3);
+const gp=d3.geoPath(proj);
+const defs=gsvg.append('defs');
+const shade=defs.append('radialGradient').attr('id','shine').attr('cx','38%').attr('cy','32%').attr('r','75%');
+shade.append('stop').attr('offset','0%').attr('stop-color','#fff').attr('stop-opacity',.18);
+shade.append('stop').attr('offset','100%').attr('stop-color','#000').attr('stop-opacity',.18);
+const gOcean=gsvg.append('path').datum({type:'Sphere'}).attr('fill','var(--ocean)');
+const gLand=gsvg.append('path').datum(land).attr('fill','var(--land)');
+const gBorders=gsvg.append('path').datum(borders).attr('fill','none').attr('stroke','var(--border)').attr('stroke-width',.5);
+const gTrop=gsvg.append('g');
+gTrop.selectAll('path').data([0,23.44,-23.44]).join('path').datum(d=>parallel(d)).attr('fill','none').attr('stroke','var(--muted)').attr('stroke-opacity',.35).attr('stroke-width',.8).attr('stroke-dasharray',(d,i)=>i?'3 4':null);
+const gOceanLbl=gsvg.append('g').attr('pointer-events','none').attr('opacity',.45);
+gOceanLbl.selectAll('text').data(OC).join('text').attr('text-anchor','middle').attr('fill','var(--hi)').attr('fill-opacity',.6).attr('font-size',d=>d.b?22:16).attr('font-weight',700).attr('letter-spacing','.35em').text(d=>d.n);
+const gCur=gsvg.append('g').attr('pointer-events','none');
+const gHit=gsvg.append('g');
+const gDots=gsvg.append('g').attr('pointer-events','none');
+const gShine=gsvg.append('path').datum({type:'Sphere'}).attr('fill','url(#shine)').attr('pointer-events','none');
+const gRim=gsvg.append('path').datum({type:'Sphere'}).attr('fill','none').attr('stroke','var(--line)').attr('stroke-width',1.5);
+const gLbl=gsvg.append('g');
+gCur.selectAll('path').data(CURRENTS).join('path').attr('class','flow').attr('fill','none').attr('stroke-linecap','round').attr('stroke-dasharray','14 6').attr('stroke',col);
+gHit.selectAll('path').data(CURRENTS).join('path').attr('fill','none').attr('stroke','transparent').attr('stroke-width',16).attr('pointer-events','stroke').style('cursor','pointer')
+  .on('click',(ev,d)=>{ev.stopPropagation();selectCurrent(CURRENTS.indexOf(d));});
+function visible(ll){const r=proj.rotate();return d3.geoDistance(ll,[-r[0],-r[1]])<Math.PI/2-0.06;}
+function drawGlobe(){
+  proj.rotate(state.rot);const s=state.sel;
+  gOcean.attr('d',gp);gLand.attr('d',gp);gBorders.attr('d',gp);gShine.attr('d',gp);gRim.attr('d',gp);gTrop.selectAll('path').attr('d',gp);
+  gOceanLbl.selectAll('text').each(function(d){const r1=proj.rotate(),v=d3.geoDistance(d.p,[-r1[0],-r1[1]])<1.2,t=d3.select(this);t.attr('display',v?null:'none');if(!v)return;const q=proj(d.p);t.attr('x',q[0]).attr('y',q[1]);});
+  gCur.selectAll('path').attr('d',d=>gp(d.geo)).attr('display',(d,i)=>show(d,i)?null:'none')
+    .attr('stroke-width',(d,i)=>i===s?6:3.2).attr('stroke-opacity',(d,i)=>s<0||i===s?.95:.3);
+  gHit.selectAll('path').attr('d',d=>gp(d.geo)).attr('display',(d,i)=>show(d,i)?null:'none');
+  const lab=gLbl.selectAll('text').data(CURRENTS).join('text').attr('class','cur-label').attr('text-anchor','middle').style('cursor','pointer')
+    .on('click',(ev,d)=>{ev.stopPropagation();selectCurrent(CURRENTS.indexOf(d));});
+  lab.each(function(d,i){const t=d3.select(this),v=show(d,i)&&visible(d.lab)&&(!d.h||i===s);t.attr('display',v?null:'none');if(!v)return;
+    const q=proj(d.lab);t.attr('x',q[0]).attr('y',q[1]).attr('fill',col(d)).attr('font-size',(i===s?22:16)-(lang==='en'?2:0)).attr('opacity',s<0||i===s?1:.45).text(L(d));});
+  gLbl.selectAll('text').filter((d,i)=>i===s).raise();
+}
+let dragStart=null,anim=null;
+function stopAnim(){if(anim){cancelAnimationFrame(anim);anim=null;}}
+gsvg.call(d3.drag().on('start',ev=>{dragStart={x:ev.x,y:ev.y,r:state.rot.slice()};stopAnim();})
+  .on('drag',ev=>{const k=.32,ty=v=>Math.max(-75,Math.min(75,v));state.rot=[dragStart.r[0]+(ev.x-dragStart.x)*k,ty(dragStart.r[1]-(ev.y-dragStart.y)*k)];drawGlobe();drawView();}));
+function rotateTo(lon,lat){stopAnim();const from=state.rot.slice();let to=[-lon,Math.max(-60,Math.min(60,-lat))];to[0]=from[0]+(((to[0]-from[0])%360+540)%360-180);
+  const dur=matchMedia('(prefers-reduced-motion: reduce)').matches?1:900,t0=performance.now();
+  const step=now=>{const k=Math.min(1,(now-t0)/dur),e=d3.easeCubicInOut(k);state.rot=[from[0]+(to[0]-from[0])*e,from[1]+(to[1]-from[1])*e];drawGlobe();drawView();anim=k<1?requestAnimationFrame(step):null;};
+  anim=requestAnimationFrame(step);}
+
+// ---------- flat map ----------
+const FW=1000,FH=500,TOP=28;
+const fsvg=d3.select('#flat');
+const fproj=d3.geoEquirectangular().scale(FW/(2*Math.PI)).translate([FW/2,TOP+FH/2]).precision(.3);
+const fp=d3.geoPath(fproj);
+fsvg.append('rect').attr('x',0).attr('y',TOP).attr('width',FW).attr('height',FH).attr('fill','var(--ocean)');
+fsvg.append('g').selectAll('rect').data(d3.range(-12,13)).join('rect').attr('x',k=>fproj([k*15-7.5,0])[0]).attr('width',FW/24).attr('y',TOP).attr('height',FH)
+  .attr('fill','var(--ocean-deep)').attr('fill-opacity',k=>Math.abs(k)%2?.55:0);
+fsvg.append('path').datum(land).attr('d',fp).attr('fill','var(--land)');
+fsvg.append('path').datum(borders).attr('d',fp).attr('fill','none').attr('stroke','var(--border)').attr('stroke-width',.5);
+fsvg.append('g').selectAll('path').data([0,23.44,-23.44]).join('path').attr('d',d=>fp(parallel(d))).attr('fill','none').attr('stroke','var(--muted)').attr('stroke-opacity',.5).attr('stroke-dasharray',(d,i)=>i?'3 4':null);
+const fOceanLbl=fsvg.append('g').attr('pointer-events','none').attr('opacity',.25);fOceanLbl.selectAll('text').data([{n:'太平洋',p:[-140,5],b:1},{n:'太平洋',p:[165,8],b:1},{n:'大西洋',p:[-38,28],b:1},{n:'大西洋',p:[-15,-25],b:1},{n:'印度洋',p:[78,-22],b:1},{n:'北冰洋',p:[-30,80]},{n:'南冰洋',p:[30,-62]}]).join('text')
+  .attr('x',d=>fproj(d.p)[0]).attr('y',d=>fproj(d.p)[1]).attr('text-anchor','middle').attr('fill','var(--hi)').attr('fill-opacity',.55).attr('font-size',d=>d.b?26:19).attr('font-weight',700).attr('letter-spacing','.35em').text(d=>d.n);
+[['赤道 0°',0],['北回歸線',23.44],['南回歸線',-23.44]].forEach(([tx,la],k)=>fsvg.append('text').attr('class','globe-label latlbl').attr('data-k',k).attr('x',8).attr('y',fproj([0,la])[1]-6).attr('font-size',15).attr('fill','var(--muted)').text(tx));
+const fdefs=fsvg.append('defs');
+[['warm','var(--warm)'],['cold','var(--cold)']].forEach(([k,c])=>fdefs.append('marker').attr('id','arr-'+k).attr('viewBox','0 0 10 10').attr('refX',6).attr('refY',5).attr('markerWidth',4).attr('markerHeight',4).attr('orient','auto').append('path').attr('d','M0,0 L10,5 L0,10 z').attr('fill',c));
+const fView=fsvg.append('rect').attr('y',TOP).attr('height',FH).attr('fill','none').attr('stroke','var(--ink)').attr('stroke-opacity',.6).attr('stroke-width',1.5).attr('stroke-dasharray','6 4').attr('rx',6).attr('class','flow').attr('width',FW/2);
+const fLine=fsvg.append('g').attr('pointer-events','none'),fHit=fsvg.append('g'),fDots=fsvg.append('g').attr('pointer-events','none'),fLbl=fsvg.append('g');
+fLine.selectAll('path').data(CURRENTS).join('path').attr('d',d=>fp(d.geo)).attr('class','flow').attr('fill','none').attr('stroke-linecap','round').attr('stroke-dasharray','14 6')
+  .attr('stroke',col).attr('marker-end',d=>`url(#arr-${d.w?'warm':'cold'})`);
+fHit.selectAll('path').data(CURRENTS).join('path').attr('d',d=>fp(d.geo)).attr('fill','none').attr('stroke','transparent').attr('stroke-width',18).attr('pointer-events','stroke').style('cursor','pointer')
+  .on('click',(ev,d)=>{ev.stopPropagation();selectCurrent(CURRENTS.indexOf(d));});
+fLbl.selectAll('text').data(CURRENTS).join('text').attr('class','cur-label').attr('text-anchor','middle').attr('x',d=>fproj(d.lab)[0]).attr('y',d=>fproj(d.lab)[1]).attr('fill',col).text(d=>d.n).style('cursor','pointer')
+  .on('click',(ev,d)=>{ev.stopPropagation();selectCurrent(CURRENTS.indexOf(d));});
+fsvg.on('click',ev=>{const [x,y]=d3.pointer(ev);const ll=fproj.invert([x,y]);rotateTo(ll[0],ll[1]);});
+function drawView(){const vc=((-state.rot[0])%360+540)%360-180;fView.attr('x',fproj([vc,0])[0]-FW/4);}
+function drawFlat(){const s=state.sel;
+  fLine.selectAll('path').attr('display',(d,i)=>show(d,i)?null:'none').attr('stroke-width',(d,i)=>i===s?6:3.2).attr('stroke-opacity',(d,i)=>s<0||i===s?.95:.3);
+  fHit.selectAll('path').attr('display',(d,i)=>show(d,i)?null:'none');
+  fLbl.selectAll('text').attr('display',(d,i)=>show(d,i)&&(!d.h||i===s)?null:'none').attr('font-size',(d,i)=>(i===s?22:17)-(lang==='en'?3:0)).text(d=>L(d)).attr('opacity',(d,i)=>s<0||i===s?1:.45);
+  fLbl.selectAll('text').filter((d,i)=>i===s).raise();drawView();}
+
+// ---------- moving water drops ----------
+const DOTS=[];
+fLine.selectAll('path').each(function(d,i){const L=this.getTotalLength();const n=Math.max(2,Math.round(L/65));for(let k=0;k<n;k++)DOTS.push({i,el:this,L,off:k/n});});
+fDots.selectAll('circle').data(DOTS).join('circle').attr('r',4.2).attr('fill',d=>col(CURRENTS[d.i])).attr('stroke','var(--surface)').attr('stroke-width',1.4);
+gDots.selectAll('circle').data(DOTS).join('circle').attr('r',3.6).attr('fill',d=>col(CURRENTS[d.i])).attr('stroke','var(--surface)').attr('stroke-width',1.2);
+function tick(now){const s=state.sel,sec=now/1000;
+  fDots.selectAll('circle').each(function(d){const c=CURRENTS[d.i];if(!show(c,d.i)){d.a=0;this.setAttribute('opacity',0);return;}
+    const u=(d.off+sec*30/d.L)%1,p=d.el.getPointAtLength(u*d.L);d.p=p;d.a=Math.min(1,u*8,(1-u)*8)*(s<0||d.i===s?1:.25);
+    this.setAttribute('cx',p.x);this.setAttribute('cy',p.y);this.setAttribute('opacity',d.a);});
+  gDots.selectAll('circle').each(function(d){if(!d.a||!d.p){this.setAttribute('display','none');return;}const ll=fproj.invert([d.p.x,d.p.y]);
+    if(!visible(ll)){this.setAttribute('display','none');return;}const q=proj(ll);this.removeAttribute('display');this.setAttribute('cx',q[0]);this.setAttribute('cy',q[1]);this.setAttribute('opacity',d.a);});
+  requestAnimationFrame(tick);}
+
+// ---------- panel ----------
+const curCard=document.getElementById('curCard'),curBtns=document.getElementById('curBtns');
+document.getElementById('cnt').textContent=CURRENTS.length;
+CURRENTS.forEach((c,i)=>{const b=document.createElement('button');b.textContent=curName(c);b.style.borderColor=col(c);b.onclick=()=>selectCurrent(i);curBtns.appendChild(b);});
+function drawCard(){
+  curBtns.querySelectorAll('button').forEach((b,i)=>{b.textContent=curName(CURRENTS[i]);b.classList.toggle('sel',i===state.sel);b.style.display=show(CURRENTS[i],i)?'':'none';});
+  if(state.sel<0){curCard.innerHTML=`<h2 style="font-size:18px">${t('cardH')}</h2><p class="meta">${t('cardP')}</p>`;return;}
+  const c=CURRENTS[state.sel];
+  curCard.innerHTML=`<h2>${curName(c)}</h2><div class="meta" style="margin-top:4px"><span class="badge" style="color:${col(c)};font-weight:700">${c.w?t('warm'):t('cold')}</span>${c.w?t('warmDesc'):t('coldDesc')}</div><p>${D(c)}</p>`;
+}
+function render(){drawGlobe();drawFlat();drawCard();}
+function selectCurrent(i){const c=CURRENTS[i];if(!show(c,i)){state.f='all';syncF();}state.sel=i;const m=c.pts[Math.floor(c.pts.length/2)];render();rotateTo(m[0],m[1]);}
+const fBtns=document.querySelectorAll('[data-f]');
+function syncF(){fBtns.forEach(b=>b.classList.toggle('on',b.dataset.f===state.f));}
+fBtns.forEach(b=>b.onclick=()=>{state.f=b.dataset.f;if(state.sel>=0&&!show(CURRENTS[state.sel],state.sel))state.sel=-1;syncF();render();});
+document.getElementById('btnTW').onclick=()=>{state.sel=0;if(!show(CURRENTS[0],0)){state.f='all';syncF();}render();rotateTo(121,23.5);};
+
+// ---------- quiz ----------
+const CUR_Q=[
+  {q:'西歐的冬天比同緯度的地方溫和，主要是靠哪一道洋流？',a:'北大西洋暖流',o:['北大西洋暖流','加那利涼流','拉布拉多寒流','祕魯涼流'],c:'北大西洋暖流',e:'灣流延伸出來的北大西洋暖流，把溫暖的海水送到歐洲西岸，西風再把暖空氣吹上岸，所以冬天比較溫和。'},
+  {q:'流經台灣東部、一年四季都很溫暖的洋流是？',a:'黑潮',o:['黑潮','親潮','中國沿岸流','加州涼流'],c:'黑潮',e:'黑潮從菲律賓東邊往北流，經過台灣東部再到日本，是從低緯度流向高緯度的暖流。'},
+  {q:'冬天流進台灣海峽、讓西部沿海變冷的是？',a:'中國沿岸流',o:['中國沿岸流','黑潮','親潮','北赤道洋流'],c:'中國沿岸流',e:'冬天東北季風一吹，中國沿岸的冷海水就往南流進台灣海峽，所以冬天台灣西部沿海水溫比東部低。'},
+  {q:'日本東北外海的大漁場，是哪兩道洋流交會形成的？',a:'黑潮＋親潮',o:['黑潮＋親潮','灣流＋拉布拉多寒流','祕魯涼流＋巴西暖流','本格拉涼流＋莫三比克暖流'],c:'親潮',e:'南來的暖流黑潮和北來的寒流親潮在這裡相遇，海水翻攪把營養鹽帶上來，浮游生物多，魚就多。'},
+  {q:'寒流經過的海岸，常常會出現哪一種景觀？',a:'沙漠',o:['沙漠','熱帶雨林','冰河','火山'],c:'祕魯涼流',e:'寒流讓海面上的空氣變冷、變重，不容易往上升成雲下雨，所以沿岸常形成沙漠，例如祕魯涼流旁的阿他加馬沙漠、本格拉涼流旁的那米比沙漠。'},
+  {q:'北半球大洋裡的大環流，大致朝哪個方向轉？',a:'順時針',o:['順時針','逆時針','一直往北流','不會轉圈'],c:'灣流',e:'赤道附近的信風往西吹、中緯度的西風往東吹，再加上地球自轉讓水流向右偏，北半球的環流就順時針轉；南半球剛好相反，是逆時針。'},
+  {q:'繞著南極洲流一整圈、水量最大的洋流是？',a:'西風漂流',o:['西風漂流','北赤道洋流','灣流','黑潮'],c:'西風漂流',e:'南半球高緯度幾乎沒有大陸擋路，西風一直把海水往東吹，就繞著南極洲流成一個大圈。'}
+];
+let level='E',score=[0,0],cur=null;
+const qText=document.getElementById('qText'),qOpts=document.getElementById('qOpts'),qExp=document.getElementById('qExplain'),qShow=document.getElementById('qShow');
+const lvE=document.getElementById('lvE'),lvJ=document.getElementById('lvJ');
+lvE.onclick=()=>{level='E';lvE.classList.add('on');lvJ.classList.remove('on');newQ();};
+lvJ.onclick=()=>{level='J';lvJ.classList.add('on');lvE.classList.remove('on');newQ();};
+const rnd=n=>Math.floor(Math.random()*n),pick=a=>a[rnd(a.length)],shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(v=>v[1]);
+const EASY=[1,5];
+function newQ(){
+  let q;
+  if(Math.random()<(level==='J'?.6:.25)){const f=level==='J'?pick(CUR_Q):CUR_Q[pick(EASY)],i=CURRENTS.findIndex(x=>x.n===f.c);const fi=lang==='zh'?f:CQ[lang][CUR_Q.indexOf(f)];q={q:fi.q,ans:fi.a,opts:shuffle(fi.o.slice()),exp:fi.e,i};}
+  else{const i=rnd(CURRENTS.length),c=CURRENTS[i],nm=curName(c);
+    q={q:t('qType')(nm),ans:c.w?t('optW'):t('optC'),opts:[t('optW'),t('optC')],i,exp:t('expType')(nm,c.w)};}
+  cur=q;qText.textContent=q.q;qExp.classList.remove('show');qShow.style.display='none';qOpts.innerHTML='';
+  q.opts.forEach(o=>{const b=document.createElement('button');b.textContent=o;b.onclick=()=>answer(b,o);qOpts.appendChild(b);});
+}
+function answer(b,o){
+  if(cur.done)return;cur.done=true;score[1]++;const ok=o===cur.ans;if(ok)score[0]++;
+  qOpts.querySelectorAll('button').forEach(x=>{if(x.textContent===cur.ans)x.classList.add('right');});
+  if(!ok)b.classList.add('wrong');
+  qExp.innerHTML=(ok?'<b>'+t('right')+'</b> ':'<b>'+t('wrong')+'</b> ')+cur.exp;qExp.classList.add('show');
+  qShow.style.display='';document.getElementById('score').textContent=`${t('score')} ${score[0]} / ${score[1]}`;
+}
+document.getElementById('qNext').onclick=newQ;
+qShow.onclick=()=>{selectCurrent(cur.i);document.getElementById('flat').scrollIntoView({behavior:'smooth',block:'center'});};
+
+const skinBtns=document.querySelectorAll('[data-skin]');
+function setSkin(s){document.documentElement.setAttribute('data-skin',s);skinBtns.forEach(b=>b.classList.toggle('on',b.dataset.skin===s));try{localStorage.setItem('ocean-skin',s);}catch(e){}}
+skinBtns.forEach(b=>b.onclick=()=>setSkin(b.dataset.skin));
+let sk=null;try{sk=localStorage.getItem('ocean-skin');}catch(e){}
+setSkin(sk||(matchMedia('(prefers-color-scheme: dark)').matches?'night':'sky'));
+UI.zh.learn=document.getElementById('learn').innerHTML;
+const langBtns=document.querySelectorAll('[data-lang]');
+function setLang(l){lang=UI[l]?l:'zh';document.documentElement.lang=t('html');document.title=t('title');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{el.textContent=t(el.dataset.i18n);});
+  document.getElementById('learn').innerHTML=t('learn');
+  langBtns.forEach(b=>b.classList.toggle('on',b.dataset.lang===lang));
+  const ls=lang==='en'?'.12em':'.35em';
+  gOceanLbl.selectAll('text').text(d=>OCN(d.n)).attr('letter-spacing',ls);fOceanLbl.selectAll('text').text(d=>OCN(d.n)).attr('letter-spacing',ls);
+  fsvg.selectAll('.latlbl').text(function(){return t('lat')[+this.dataset.k];});
+  if(score[1])document.getElementById('score').textContent=`${t('score')} ${score[0]} / ${score[1]}`;
+  try{localStorage.setItem('ocean-lang',lang);}catch(e){}
+  render();newQ();}
+langBtns.forEach(b=>b.onclick=()=>setLang(b.dataset.lang));
+let lg=null;try{lg=localStorage.getItem('ocean-lang');}catch(e){}
+if(!lg){const nl=(navigator.language||'').toLowerCase();lg=nl.startsWith('ja')?'ja':nl.startsWith('en')?'en':'zh';}
+setLang(lg);requestAnimationFrame(tick);
+})();
+});
+</script>
+</body>
+</html>
